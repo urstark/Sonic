@@ -1,0 +1,56 @@
+# ==========================================
+# Sonic Emojis Configuration
+# ==========================================
+# Format: "<emoji id='ID'>FALLBACK</emoji>" for premium
+# Or "CHAR" for standard.
+
+# --- [ Section: Main Bot Icons ] ---
+emo_start: "<emoji id='6226413607974868029'>✨</emoji>"
+emo_start2: "<emoji id='6186119869776271443 '>✨</emoji>"
+emo_uptime: "<emoji id='5447448489149625830'>✨</emoji>" # Used in stats, keep simple
+emo_info2: "<emoji id='5247236071795754971'>✨</emoji>"
+emo_ping: "<emoji id='5886666052590377346'>✨</emoji>"   # Used in ping, keep simple
+emo_success: "<emoji id='5447242579827523388'>✨</emoji>"
+emo_warn: "<emoji id='5447381715293074599'>✨</emoji>"   # Used in cards
+emo_test: "<emoji id='5447213996820168272'>✨</emoji>"   # Used in speedtest
+emo_reload: "<emoji id='5258420634785947640'>✨</emoji>"
+emo_star: "<emoji id='5886666052590377346'>✨</emoji>"   # Used in stats, keep simple
+
+# --- [ Section: Player & Playback ] ---
+emo_play: "<emoji id='5773626993010546707'>✨</emoji>"
+emo_pause: "<emoji id='5260249440450520061'>✨</emoji>"
+emo_stop: "<emoji id='5258362429389152256'>✨</emoji>"
+emo_skip: "<emoji id='5447651546613449378'>✨</emoji>"
+emo_resume: "<emoji id='5445408306669582934'>✨</emoji>"
+emo_shuffle: "<emoji id='5445260044398524944'>✨</emoji>"
+emo_seek: "<emoji id='5445388803223091254'>✨</emoji>"
+emo_speed: "<emoji id='5219943216781995020'>✨</emoji>"
+emo_type: "<emoji id='5445023138297447592'>✨</emoji>"
+emo_title: "<emoji id='5938473438468378529'>✨</emoji>"
+emo_dur: "<emoji id='5983150113483134607'>✨</emoji>"
+emo_req: "<emoji id='6033108709213736873'>✨</emoji>"
+emo_views: "<emoji id='5253959125838090076'>✨</emoji>"
+emo_pub: "<emoji id='5850317551090800862'>✨</emoji>"
+emo_channel: "<emoji id='5445408306669582934'>✨</emoji>"
+emo_track: "<emoji id='4904898741326054363'>✨</emoji>"
+
+# --- [ Section: Queue & Search ] ---
+emo_queue: "<emoji id='6032924188828767321'>✨</emoji>"
+emo_card: "<emoji id='5922693616953725714'>✨</emoji>"
+emo_queue_add: "<emoji id='6032924188828767321'>✨</emoji>"
+
+emo_search: "<emoji id='5886666052590377346'>✨</emoji>"
+
+emo_download: "<emoji id='5444961234933806330'>✨</emoji>"
+
+# --- [ Section: UI Navigation ] ---
+emo_help: "<emoji id='5258503720928288433'>✨</emoji>"
+emo_helps: "<emoji id='5886370631854856335'>✨</emoji>"
+emo_bullet: "<emoji id='5447181973544008180'>✨</emoji>" # Used in stats/ping, keep simple
+emo_arrow_3: "<emoji id='5447181973544008180'>✨</emoji>"
+
+# --- [ Section: Moderation & Blacklist ] ---
+emo_block: "<emoji id='5447385112612208213'>✨</emoji>"
+
+# --- [ Section: States ] ---
+emo_happy: "<emoji id='6028315147754278596'>✨</emoji>"
