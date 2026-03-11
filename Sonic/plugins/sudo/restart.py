@@ -8,6 +8,7 @@ import urllib3
 from git import Repo
 from git.exc import GitCommandError, InvalidGitRepositoryError
 from pyrogram import filters
+from pyrogram.types import LinkPreviewOptions
 
 import config
 from Sonic import app
@@ -73,7 +74,7 @@ async def update_(client, message, _):
             f"<b>A new update is available for the bot !</b>\n\n➣ Pushing updates now\n\n<b><u>Updates:</u></b>\n\n<a href={url}> View Updates</a>"
         )
     else:
-        nrs = await response.edit(_final_updates_, disable_web_page_preview=True)
+        nrs = await response.edit(_final_updates_, link_preview_options=LinkPreviewOptions(is_disabled=True))
     os.system("git stash &> /dev/null && git pull")
 
     try:

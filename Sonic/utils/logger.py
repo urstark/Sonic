@@ -1,4 +1,5 @@
 from pyrogram.enums import ParseMode
+from pyrogram.types import LinkPreviewOptions
 
 from Sonic import app
 from Sonic.utils.database import is_on_off
@@ -26,7 +27,7 @@ async def play_logs(message, streamtype):
                     chat_id=LOG_GROUP_ID,
                     text=logger_text,
                     parse_mode=ParseMode.HTML,
-                    disable_web_page_preview=True,
+                    link_preview_options=LinkPreviewOptions(is_disabled=True),
                 )
             except:
                 pass

@@ -1,5 +1,5 @@
 from pyrogram.enums import ChatType
-from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup
+from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup, LinkPreviewOptions
 
 from Sonic import app
 from Sonic.misc import SUDOERS, db
@@ -25,7 +25,7 @@ def AdminRightsCheck(mystic):
             if message.from_user.id not in SUDOERS:
                 return await message.reply_text(
                     text=f"{app.mention} is under maintenance, visit <a href={SUPPORT_GROUP}>support chat</a> for knowing the reason.",
-                    disable_web_page_preview=True,
+                    link_preview_options=LinkPreviewOptions(is_disabled=True),
                 )
 
         try:
@@ -121,7 +121,7 @@ def AdminActual(mystic):
             if message.from_user.id not in SUDOERS:
                 return await message.reply_text(
                     text=f"{app.mention} is under maintenance, visit <a href={SUPPORT_GROUP}>support chat</a> for knowing the reason.",
-                    disable_web_page_preview=True,
+                    link_preview_options=LinkPreviewOptions(is_disabled=True),
                 )
 
         try:

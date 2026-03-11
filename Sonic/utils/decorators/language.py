@@ -1,3 +1,4 @@
+from pyrogram.types import LinkPreviewOptions
 from Sonic import app
 from Sonic.misc import SUDOERS
 from Sonic.utils.database import get_lang, is_maintenance
@@ -11,7 +12,7 @@ def language(mystic):
             if message.from_user.id not in SUDOERS:
                 return await message.reply_text(
                     text=f"{app.mention} is under maintenance, visit <a href={SUPPORT_GROUP}>support chat</a> for knowing the reason.",
-                    disable_web_page_preview=True,
+                    link_preview_options=LinkPreviewOptions(is_disabled=True),
                 )
         try:
             await message.delete()

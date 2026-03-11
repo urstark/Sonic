@@ -10,6 +10,7 @@ from PIL import Image, ImageDraw, ImageFont, ImageFilter, ImageEnhance
 from py_yt import VideosSearch
 
 from config import YOUTUBE_IMG_URL
+from Sonic import LOGGER
 
 async def gen_thumb(videoid: str, thumb_size=(1280, 720)):
     # Local assets paths
@@ -29,7 +30,7 @@ async def gen_thumb(videoid: str, thumb_size=(1280, 720)):
         res = await results.next()
         
         if not res or not res.get("result"):
-            print(f"DEBUG: Direct URL search failed for {videoid}, trying generic search...")
+            LOGGER.debug(f"Direct URL search failed for {videoid}, trying generic search...")
             results = VideosSearch(videoid, limit=1)
             res = await results.next()
             
@@ -65,7 +66,7 @@ async def gen_thumb(videoid: str, thumb_size=(1280, 720)):
         return path if is_generated else YOUTUBE_IMG_URL
 
     except Exception as ex:
-        print(f"Error generating thumbnail: {ex}")
+        LOGGER(__name__).exception(f"Error generating thumbnail for {videoid}: {ex}")
         return YOUTUBE_IMG_URL
 
 def _generate_image_sync(temp_path, path, thumb_size, title, channel, duration):
@@ -172,7 +173,7 @@ def _generate_image_sync(temp_path, path, thumb_size, title, channel, duration):
                 icon = Image.open(ipath).convert("RGBA")
                 return icon.resize((size, size), Image.LANCZOS)
             except Exception as e:
-                print(f"DEBUG: Failed to load icon {name}: {e}")
+                LOGGER.debug(f"Failed to load icon {name}: {e}")
                 return None
         
         icon_prev = load_icon("prev", 53)

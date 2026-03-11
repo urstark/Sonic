@@ -31,7 +31,7 @@ HEROKU_APP_NAME = getenv("HEROKU_APP_NAME")
 HEROKU_API_KEY = getenv("HEROKU_API_KEY")
 
 API_URL = getenv("API_URL", "https://api.sonic.soon.it")
-API_KEY = getenv("API_KEY", "")
+API_KEY = getenv("API_KEY", "ytm_UMeootKxfWNYWzYWVDiuatOYtGZC5diW9SxZ3s9wVD8")
 
 UPSTREAM_REPO = getenv(
     "UPSTREAM_REPO",

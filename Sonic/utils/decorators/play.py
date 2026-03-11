@@ -7,7 +7,7 @@ from pyrogram.errors import (
     UserAlreadyParticipant,
     UserNotParticipant,
 )
-from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup
+from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup, LinkPreviewOptions
 
 from Sonic import YouTube, app
 from Sonic.misc import SUDOERS
@@ -48,7 +48,7 @@ def PlayWrapper(command):
             if message.from_user.id not in SUDOERS:
                 return await message.reply_text(
                     text=f"{app.mention} is under maintenance, visit <a href={SUPPORT_GROUP}>support chat</a> for knowing the reason.",
-                    disable_web_page_preview=True,
+                    link_preview_options=LinkPreviewOptions(is_disabled=True),
                 )
                 
 
@@ -100,19 +100,33 @@ def PlayWrapper(command):
                 else:
                     if message.from_user.id not in admins:
                         return await message.reply_text(_["play_4"])
-        if message.command[0][0] == "v":
-            video = True
-        else:
-            if "-v" in message.text:
-                video = True
-            else:
-                video = True if message.command[0][1] == "v" else None
-        if message.command[0][-1] == "e":
+        # Better detection for video and forceplay
+        command0 = message.command[0].lower()
+        video = True if (command0[0] == "v" or (len(command0) > 1 and command0[1] == "v")) else None
+        fplay = True if "force" in command0 else None
+        
+        # Check arguments for flags
+        if len(message.command) > 1:
+            new_command = [message.command[0]]
+            for arg in message.command[1:]:
+                if arg.lower() == "force":
+                    fplay = True
+                elif arg.lower() == "-v":
+                    video = True
+                else:
+                    new_command.append(arg)
+            
+            if fplay or (video and "-v" in message.text):
+                # Update message for child handler
+                message.command = new_command
+                if len(new_command) > 1:
+                    message.text = f"{new_command[0]} {' '.join(new_command[1:])}"
+                else:
+                    message.text = new_command[0]
+
+        if fplay:
             if not await is_active_chat(chat_id):
                 return await message.reply_text(_["play_16"])
-            fplay = True
-        else:
-            fplay = None
 
         if not await is_active_chat(chat_id):
             userbot = await get_assistant(chat_id)

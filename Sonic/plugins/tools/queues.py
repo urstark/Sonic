@@ -262,25 +262,33 @@ async def play_now_from_queue(client, CallbackQuery: CallbackQuery, _):
     except:
         pass
 
-    # Now trigger a skip  this pops currently playing (index 0) and plays index 1 (our target)
+    # Now trigger a skip — this pops currently playing (index 0) and plays index 1 (our target)
     try:
+        # Guard: after moving target to position 1, the queue must have at least 2 entries
+        if len(check) < 2:
+            return await app.send_message(chat_id, "Queue is too short to skip.")
+
+        # Read target info BEFORE any pop mutations
         queued = check[1]["file"]
         videoid = check[1]["vidid"]
         streamtype = check[1]["streamtype"]
+        dur = check[1]["dur"]
+        by = check[1]["by"]
         status = True if str(streamtype) == "video" else None
 
-        # Pop index 0 (current track)
+        # Pop index 0 (current track) so our target becomes index 0
         from Sonic.utils.stream.autoclear import auto_clean
         popped = check.pop(0)
         if popped:
             await auto_clean(popped)
 
-        # Now check[0] is our target  play it
-        queued = check[0]["file"]
-        videoid = check[0]["vidid"]
-        streamtype = check[0]["streamtype"]
-        status = True if str(streamtype) == "video" else None
+        # Guard: queue must still have at least 1 item
+        if not check:
+            return await app.send_message(chat_id, "Queue is empty after skip.")
+
+        # Now check[0] is our target — reset played counter
         db[chat_id][0]["played"] = 0
+        original_chat_id = check[0]["chat_id"]
 
         if "live_" in queued:
             n, link = await YouTube.video(videoid, True)
@@ -293,11 +301,7 @@ async def play_now_from_queue(client, CallbackQuery: CallbackQuery, _):
             await Sonic.skip_stream(chat_id, link, video=status, image=image)
 
         elif "vid_" in queued:
-            language_code = await __import__("Sonic.utils.database", fromlist=["get_lang"]).get_lang(chat_id)
-            status_msg = await app.send_message(
-                check[0]["chat_id"],
-                _["call_7"],
-            )
+            status_msg = await app.send_message(original_chat_id, _["call_7"])
             try:
                 file_path, direct = await YouTube.download(videoid, status_msg, videoid=True, video=status)
             except:
@@ -326,15 +330,14 @@ async def play_now_from_queue(client, CallbackQuery: CallbackQuery, _):
         img = await gen_thumb(videoid) if videoid not in ["telegram", "soundcloud"] else (
             config.TELEGRAM_AUDIO_URL if str(streamtype) == "audio" else config.TELEGRAM_VIDEO_URL
         )
-        original_chat_id = check[0]["chat_id"]
         run = await app.send_photo(
             chat_id=original_chat_id,
             photo=img,
             caption=_["stream_1"].format(
                 f"https://t.me/{app.username}?start=info_{videoid}",
                 title[:20],
-                check[0]["dur"],
-                check[0]["by"],
+                dur,
+                by,
             ),
             reply_markup=InlineKeyboardMarkup(button),
         )
@@ -342,7 +345,8 @@ async def play_now_from_queue(client, CallbackQuery: CallbackQuery, _):
         db[chat_id][0]["markup"] = "stream"
 
     except Exception as e:
-        print(f"PlayNow error: {e}")
+        from Sonic import LOGGER
+        LOGGER(__name__).exception(f"PlayNow error: {e}")
         try:
             await app.send_message(chat_id, f"Failed to play now: {type(e).__name__}")
         except:

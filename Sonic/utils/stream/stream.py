@@ -33,7 +33,7 @@ async def stream(
     if not result:
         return
 
-    if forceplay:
+    if forceplay and isinstance(result, list):
         await Sonic.force_stop_stream(chat_id)
 
         msg = f"{_['play_19']}\n\n"
@@ -54,6 +54,7 @@ async def stream(
                 await put_queue(
                     chat_id, original_chat_id, f"vid_{vidid}", title, duration_min,
                     user_name, vidid, user_id, "video" if video else "audio",
+                    mystic=mystic,
                 )
                 pos = len(db.get(chat_id)) - 1
                 if first_position is None:
@@ -91,6 +92,7 @@ async def stream(
                     chat_id, original_chat_id, file_path if direct else f"vid_{vidid}",
                     title, duration_min, user_name, vidid, user_id, "video" if video else "audio",
                     forceplay=forceplay,
+                    mystic=mystic,
                 )
                 await Sonic.join_call(chat_id, original_chat_id, file_path, video=status, image=thumbnail)
                 if first_position is None:
@@ -157,11 +159,17 @@ async def stream(
             try:
                 await mystic.edit_text(caption, reply_markup=InlineKeyboardMarkup(upl))
             except:
-                await app.send_message(
+                run = await app.send_message(
                     chat_id=original_chat_id,
                     text=caption,
                     reply_markup=InlineKeyboardMarkup(upl),
                 )
+                # Update mystic for all newly added songs
+                for idx in range(pos - count + 1, pos + 1):
+                    try:
+                        db[chat_id][idx]["mystic"] = run
+                    except:
+                        pass
             return
 
     elif streamtype == "db_playlist":
@@ -183,6 +191,7 @@ async def stream(
                 await put_queue(
                     chat_id, original_chat_id, f"vid_{vidid}", title, duration_min,
                     user_name, vidid, user_id, "video" if video else "audio",
+                    mystic=mystic,
                 )
                 pos = len(db.get(chat_id)) - 1
                 if first_position is None:
@@ -218,6 +227,7 @@ async def stream(
                     chat_id, original_chat_id, file_path if direct else f"vid_{vidid}",
                     title, duration_min, user_name, vidid, user_id, "video" if video else "audio",
                     forceplay=forceplay,
+                    mystic=mystic,
                 )
                 await Sonic.join_call(chat_id, original_chat_id, file_path, video=status, image=config.PLAYLIST_IMG_URL)
                 if first_position is None:
@@ -238,9 +248,8 @@ async def stream(
                 
                 remaining = result[result.index(track)+1 : config.PLAYLIST_FETCH_LIMIT]
                 if remaining:
-                    tasks = [put_track(t) for t in remaining]
+                    tasks = [fetch_and_put(t) for t in remaining]
                     await asyncio.gather(*tasks)
-                break
                 break
             if first_position == 0:
                 if count > 1:
@@ -268,11 +277,17 @@ async def stream(
             try:
                 await mystic.edit_text(caption, reply_markup=InlineKeyboardMarkup(upl))
             except:
-                await app.send_message(
+                run = await app.send_message(
                     chat_id=original_chat_id,
                     text=caption,
                     reply_markup=InlineKeyboardMarkup(upl),
                 )
+                # Update mystic for all newly added songs
+                for idx in range(final_pos, final_pos + count):
+                    try:
+                        db[chat_id][idx]["mystic"] = run
+                    except:
+                        pass
             return
 
     elif streamtype == "youtube":
@@ -283,9 +298,12 @@ async def stream(
         thumbnail = result["thumb"]
         status = True if video else None
 
+        # For forceplay, stop current stream so we always take the immediate-play path
+        if forceplay:
+            await Sonic.force_stop_stream(chat_id)
 
         current_queue = db.get(chat_id)
-        if current_queue is not None and len(current_queue) >= 10:
+        if not forceplay and current_queue is not None and len(current_queue) >= 10:
              return await mystic.edit_text("You can't add more than 10 songs to the queue.")
 
         try:
@@ -310,6 +328,7 @@ async def stream(
                 vidid,
                 user_id,
                 "video" if video else "audio",
+                mystic=mystic,
             )
             position = len(db.get(chat_id)) - 1
             button = aq_markup(_, chat_id, position)
@@ -321,11 +340,15 @@ async def stream(
                     await mystic.delete()
                 except:
                     pass
-                await app.send_message(
+                run = await app.send_message(
                     chat_id=original_chat_id,
                     text=caption,
                     reply_markup=InlineKeyboardMarkup(button),
                 )
+                try:
+                    db[chat_id][position]["mystic"] = run
+                except:
+                    pass
             db[chat_id][0]["markup"] = "stream"
         else:
             if not forceplay:
@@ -342,6 +365,7 @@ async def stream(
                 user_id,
                 "video" if video else "audio",
                 forceplay=forceplay,
+                mystic=mystic,
             )
             await Sonic.join_call(
                 chat_id,
@@ -394,6 +418,10 @@ async def stream(
         if not file_path:
             raise AssistantErr(_["play_14"])
 
+        # For forceplay, stop current stream so we always take the immediate-play path
+        if forceplay:
+            await Sonic.force_stop_stream(chat_id)
+
         if await is_active_chat(chat_id):
             await put_queue(
                 chat_id,
@@ -405,6 +433,7 @@ async def stream(
                 streamtype,
                 user_id,
                 "audio",
+                mystic=mystic,
             )
             position = len(db.get(chat_id)) - 1
             button = aq_markup(_, chat_id, position)
@@ -432,6 +461,7 @@ async def stream(
                 user_id,
                 "audio",
                 forceplay=forceplay,
+                mystic=mystic,
             )
             await Sonic.join_call(chat_id, original_chat_id, file_path, video=None)
             button = stream_markup(_, chat_id)
@@ -473,6 +503,10 @@ async def stream(
         if not file_path:
             raise AssistantErr(_["play_5"])
 
+        # For forceplay, stop current stream so we always take the immediate-play path
+        if forceplay:
+            await Sonic.force_stop_stream(chat_id)
+
         if await is_active_chat(chat_id):
             await put_queue(
                 chat_id,
@@ -484,6 +518,7 @@ async def stream(
                 streamtype,
                 user_id,
                 "video" if video else "audio",
+                mystic=mystic,
             )
             position = len(db.get(chat_id)) - 1
             button = aq_markup(_, chat_id, position)
@@ -524,6 +559,7 @@ async def stream(
                 user_id,
                 "video" if video else "audio",
                 forceplay=forceplay,
+                mystic=mystic,
             )
             await Sonic.join_call(chat_id, original_chat_id, file_path, video=status)
             if video:
@@ -562,6 +598,10 @@ async def stream(
         duration_min = "Live Track"
         status = True if video else None
         
+        # For forceplay, stop current stream so we always take the immediate-play path
+        if forceplay:
+            await Sonic.force_stop_stream(chat_id)
+
         if await is_active_chat(chat_id):
             await put_queue(
                 chat_id,
@@ -573,6 +613,7 @@ async def stream(
                 vidid,
                 user_id,
                 "video" if video else "audio",
+                mystic=mystic,
             )
             position = len(db.get(chat_id)) - 1
             button = aq_markup(_, chat_id, position)
@@ -621,6 +662,7 @@ async def stream(
                 user_id,
                 "video" if video else "audio",
                 forceplay=forceplay,
+                mystic=mystic,
             )
             await Sonic.join_call(
                 chat_id,
@@ -670,6 +712,7 @@ async def stream(
                 user_name,
                 link,
                 "video" if video else "audio",
+                mystic=mystic,
             )
             position = len(db.get(chat_id)) - 1
             button = aq_markup(_, chat_id, position)
@@ -708,6 +751,7 @@ async def stream(
                 link,
                 "video" if video else "audio",
                 forceplay=forceplay,
+                mystic=mystic,
             )
             await Sonic.join_call(
                 chat_id,

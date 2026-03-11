@@ -10,12 +10,13 @@ from pyrogram.types import (
     InlineKeyboardMarkup,
     Message,
     CallbackQuery,
-    InputMediaPhoto
+    InputMediaPhoto,
+    LinkPreviewOptions
 )
 from py_yt import VideosSearch
 
 import config
-from Sonic import app
+from Sonic import app, LOGGER
 from Sonic.misc import _boot_
 from Sonic.plugins.sudo.sudoers import sudoers_list
 from Sonic.utils.database import (
@@ -215,7 +216,7 @@ async def welcome(client, message: Message):
                             f"https://t.me/{app.username}?start=sudolist",
                             config.SUPPORT_GROUP,
                         ),
-                        disable_web_page_preview=True,
+                        link_preview_options=LinkPreviewOptions(is_disabled=True),
                     )
                     return await app.leave_chat(message.chat.id)
 
@@ -233,4 +234,4 @@ async def welcome(client, message: Message):
                 await add_served_chat(message.chat.id)
                 await message.stop_propagation()
         except Exception as ex:
-            print(ex)
+            LOGGER.exception(f"Error in welcome module: {ex}")

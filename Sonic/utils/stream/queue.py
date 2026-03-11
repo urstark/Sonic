@@ -1,5 +1,6 @@
 import asyncio
 from typing import Union
+from pyrogram.types import Message
 
 from Sonic.misc import db
 from Sonic.utils.formatters import check_duration, seconds_to_min
@@ -17,6 +18,7 @@ async def put_queue(
     user_id,
     stream,
     forceplay: Union[bool, str] = None,
+    mystic: Message = None,
 ):
     title = title.title()
     try:
@@ -34,6 +36,7 @@ async def put_queue(
         "vidid": vidid,
         "seconds": duration_in_seconds,
         "played": 0,
+        "mystic": mystic,
     }
     if forceplay:
         check = db.get(chat_id)
@@ -59,6 +62,7 @@ async def put_queue_index(
     vidid,
     stream,
     forceplay: Union[bool, str] = None,
+    mystic: Message = None,
 ):
     if "20.212.146.162" in vidid:
         try:
@@ -81,6 +85,7 @@ async def put_queue_index(
         "vidid": vidid,
         "seconds": dur,
         "played": 0,
+        "mystic": mystic,
     }
     if forceplay:
         check = db.get(chat_id)

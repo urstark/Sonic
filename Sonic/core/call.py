@@ -344,6 +344,10 @@ class Call(PyTgCalls):
         original_chat_id = check[0]["chat_id"]
         streamtype = check[0]["streamtype"]
         videoid = check[0]["vidid"]
+        try:
+            await check[0]["mystic"].delete()
+        except:
+            pass
         db[chat_id][0]["played"] = 0
         exis = (check[0]).get("old_dur")
         if exis:
@@ -384,17 +388,17 @@ class Call(PyTgCalls):
             db[chat_id][0]["markup"] = "tg"
         elif "vid_" in queued:
             img = await gen_thumb(videoid)
-            mystic = await app.send_photo(original_chat_id, photo=img, caption=_["call_7"])
             try:
                 file_path, direct = await YouTube.download(
                     videoid,
-                    mystic,
+                    None,
                     videoid=True,
                     video=video,
                 )
             except Exception:
-                return await mystic.edit_text(
-                    _["call_6"], disable_web_page_preview=True
+                return await app.send_message(
+                    original_chat_id,
+                    text=_["call_6"],
                 )
             button = stream_markup(_, chat_id)
             stream = self._build_stream(file_path, video=video)
@@ -411,24 +415,12 @@ class Call(PyTgCalls):
                 check[0]["dur"],
                 user,
             )
-            run = None
-            try:
-                run = await mystic.edit_caption(
-                    caption=caption,
-                    reply_markup=InlineKeyboardMarkup(button),
-                )
-            except:
-                try:
-                    await mystic.delete()
-                except:
-                    pass
-            if not run:
-                run = await app.send_photo(
-                    chat_id=original_chat_id,
-                    photo=img,
-                    caption=caption,
-                    reply_markup=InlineKeyboardMarkup(button),
-                )
+            run = await app.send_photo(
+                chat_id=original_chat_id,
+                photo=img,
+                caption=caption,
+                reply_markup=InlineKeyboardMarkup(button),
+            )
             db[chat_id][0]["mystic"] = run
             db[chat_id][0]["markup"] = "stream"
 

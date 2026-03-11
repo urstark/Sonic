@@ -1,5 +1,5 @@
 from pyrogram import Client, filters
-from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup, Message
+from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup, Message, LinkPreviewOptions
 from pyrogram.enums import ParseMode
 from Sonic import app
 import config
@@ -39,5 +39,5 @@ async def privacy(client, message: Message):
         get_privacy_text(_), 
         reply_markup=keyboard, 
         parse_mode=ParseMode.HTML, 
-        disable_web_page_preview=True
+        link_preview_options=LinkPreviewOptions(is_disabled=True)
     )

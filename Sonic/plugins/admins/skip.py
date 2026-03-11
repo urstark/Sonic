@@ -1,5 +1,5 @@
 from pyrogram import filters
-from pyrogram.types import InlineKeyboardMarkup, InputMediaPhoto, Message
+from pyrogram.types import InlineKeyboardMarkup, InputMediaPhoto, Message, LinkPreviewOptions
 
 import config
 from Sonic import YouTube, app
@@ -74,6 +74,10 @@ async def skip(cli, message: Message, _, chat_id):
     streamtype = check[0]["streamtype"]
     videoid = check[0]["vidid"]
     status = True if str(streamtype) == "video" else None
+    try:
+        await check[0]["mystic"].delete()
+    except:
+        pass
     db[chat_id][0]["played"] = 0
     if "old_dur" in check[0]:
         db[chat_id][0]["dur"] = check[0]["old_dur"]
@@ -97,7 +101,7 @@ async def skip(cli, message: Message, _, chat_id):
 
         elif "vid_" in queued:
             # Show "downloading..." status  we'll edit this into the now-playing card
-            mystic = await message.reply_text(_["call_7"], disable_web_page_preview=True)
+            mystic = await message.reply_text(_["call_7"], link_preview_options=LinkPreviewOptions(is_disabled=True))
             try:
                 file_path, direct = await YouTube.download(
                     videoid, mystic, videoid=True, video=status

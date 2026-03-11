@@ -1,9 +1,9 @@
-import asyncio
+﻿import asyncio
 from datetime import datetime
 from pyrogram.enums import ChatType
 from pytgcalls.exceptions import NoActiveGroupCall
 import config
-from Sonic import app
+from Sonic import app, LOGGER
 from Sonic.misc import db
 from Sonic.core.call import Sonic, autoend, counter
 from Sonic.utils.database import get_client, set_loop, is_active_chat, is_autoend, is_autoleave, group_assistant
@@ -55,8 +55,8 @@ async def auto_end():
                             if not nocall:
                                 await app.send_message(
                                     chat_id,
-                                    "» ʙᴏᴛ ᴀᴜᴛᴏᴍᴀᴛɪᴄᴀʟʟʏ ʟᴇғᴛ ᴠɪᴅᴇᴏᴄʜᴀᴛ "
-                                    "ʙᴇᴄᴀᴜsᴇ ɴᴏ ᴏɴᴇ ᴡᴀs ʟɪsᴛᴇɴɪɴɢ ᴏɴ ᴠɪᴅᴇᴏᴄʜᴀᴛ.",
+                                    "Â» Ê™á´á´› á´€á´œá´›á´á´á´€á´›Éªá´„á´€ÊŸÊŸÊ ÊŸá´‡Ò“á´› á´ Éªá´…á´‡á´á´„Êœá´€á´› "
+                                    "Ê™á´‡á´„á´€á´œsá´‡ É´á´ á´É´á´‡ á´¡á´€s ÊŸÉªsá´›á´‡É´ÉªÉ´É¢ á´É´ á´ Éªá´…á´‡á´á´„Êœá´€á´›.",
                                 )
                         except Exception:
                             pass
@@ -68,7 +68,7 @@ async def auto_end():
                     pass
 
         except Exception as e:
-            logging.info(e)
+            LOGGER(__name__).exception(f"Error in auto_end loop: {e}")
 
 
 asyncio.create_task(auto_end())

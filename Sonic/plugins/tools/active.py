@@ -1,5 +1,5 @@
 from pyrogram import filters
-from pyrogram.types import Message
+from pyrogram.types import Message, LinkPreviewOptions
 
 from Sonic import app
 from Sonic.misc import SUDOERS
@@ -47,7 +47,7 @@ async def activevc(_, message: Message):
     else:
         await mystic.edit_text(
             f"<b>List of currently active voice chats:</b>\n\n{text}",
-            disable_web_page_preview=True,
+            link_preview_options=LinkPreviewOptions(is_disabled=True),
         )
 
 
@@ -80,5 +80,5 @@ async def activevi_(_, message: Message):
     else:
         await mystic.edit_text(
             f"<b>List of current active video chats:</b>\n\n{text}",
-            disable_web_page_preview=True,
+            link_preview_options=LinkPreviewOptions(is_disabled=True),
         )

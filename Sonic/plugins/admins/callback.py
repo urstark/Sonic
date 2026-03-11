@@ -1,7 +1,7 @@
 import asyncio
 
 from pyrogram import filters
-from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup
+from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup, LinkPreviewOptions
 
 from Sonic import YouTube, app
 from Sonic.core.call import Sonic
@@ -215,6 +215,10 @@ async def del_back_playlist(client, CallbackQuery, _):
         else:
             txt = f"➻ sᴛʀᴇᴀᴍ ʀᴇ-ᴘʟᴀʏᴇᴅ 🎄\n│ \n└ʙʏ : {mention} 🥀"
         await CallbackQuery.answer()
+        try:
+            await check[0]["mystic"].delete()
+        except:
+            pass
         queued = check[0]["file"]
         title = (check[0]["title"]).title()
         user = check[0]["by"]
@@ -264,7 +268,7 @@ async def del_back_playlist(client, CallbackQuery, _):
                 pass
         elif "vid_" in queued:
             mystic = await CallbackQuery.message.reply_text(
-                _["call_7"], disable_web_page_preview=True
+                _["call_7"], link_preview_options=LinkPreviewOptions(is_disabled=True)
             )
             try:
                 file_path, direct = await YouTube.download(

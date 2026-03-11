@@ -15,6 +15,7 @@ from pyrogram.types import Message
 from py_yt import VideosSearch
 
 import config
+from Sonic import LOGGER
 from Sonic.utils.database import is_on_off
 from Sonic.utils.formatters import time_to_seconds, seconds_to_min
 
@@ -92,7 +93,7 @@ class YouTubeAPI:
                         
                         await asyncio.sleep(5)
         except Exception as e:
-            logging.error(f"Error in _download_media ({media_type}): {e}")
+            LOGGER.exception(f"Error in _download_media ({media_type}): {e}")
             if os.path.exists(file_path):
                 try:
                     os.remove(file_path)
@@ -153,6 +154,8 @@ class YouTubeAPI:
     async def details(self, link: str, videoid: Union[bool, str] = None):
         if videoid:
             link = self.base + link
+        if "youtu.be" in link:
+            link = link.split("?")[0]
         if "&" in link:
             link = link.split("&")[0]
         try:
@@ -166,7 +169,7 @@ class YouTubeAPI:
                 return title, duration_min, duration_sec, thumbnail, vidid
             return None, None, None, None, None
         except Exception as e:
-            logging.error(f"Error fetching details for {link}: {e}")
+            LOGGER(__name__).exception(f"Error fetching details for {link}: {e}")
             return None, None, None, None, None
 
     async def title(self, link: str, videoid: Union[bool, str] = None):
@@ -231,7 +234,7 @@ class YouTubeAPI:
                                 return 0, "API Error: Failed to stream."
                         await asyncio.sleep(5)
         except Exception as e:
-            logging.error(f"Exception in video method for {link}: {e}")
+            LOGGER.exception(f"Exception in video method for {link}: {e}")
             return 0, str(e)
             
         return 0, "API Error: Timeout waiting for stream"
@@ -249,10 +252,12 @@ class YouTubeAPI:
         )
         out, errorz = await proc.communicate()
         if errorz:
-            if "unavailable videos are hidden" in (errorz.decode("utf-8")).lower():
+            err_msg = errorz.decode("utf-8")
+            LOGGER(__name__).error(f"yt-dlp error in playlist: {err_msg}")
+            if "unavailable videos are hidden" in err_msg.lower():
                 output = out.decode("utf-8")
             else:
-                output = errorz.decode("utf-8")
+                output = err_msg
         else:
             output = out.decode("utf-8")
 
@@ -268,6 +273,8 @@ class YouTubeAPI:
     async def track(self, link: str, videoid: Union[bool, str] = None):
         if videoid:
             link = self.base + link
+        if "youtu.be" in link:
+            link = link.split("?")[0]
         if "&" in link:
             link = link.split("&")[0]
         try:
@@ -288,6 +295,7 @@ class YouTubeAPI:
                 return track_details, vidid
             return None, None
         except Exception as e:
+            LOGGER(__name__).exception(f"VideosSearch failed for {link}, trying fallback: {e}")
             try:
                 cookie_file = cookie_txt_file()
                 ydl_opts = {
@@ -332,7 +340,7 @@ class YouTubeAPI:
                 }
                 return track_details, vidid
             except Exception as e2:
-                logging.error(f"Error in track method for {link}: {e} | Fallback error: {e2}")
+                LOGGER(__name__).exception(f"Error in track method for {link}: {e}")
                 return None, None
 
     async def formats(self, link: str, videoid: Union[bool, str] = None):
@@ -519,7 +527,7 @@ class YouTubeAPI:
         # 3. Fallback to yt-dlp download if API fails completely
         if not downloaded_file:
             direct = True
-            logging.warning(f"API failed for {link}. Falling back to yt-dlp download.")
+            LOGGER.warning(f"API failed for {link}. Falling back to yt-dlp download.")
             if video:
                 downloaded_file = await loop.run_in_executor(None, video_dl_fallback)
             else:

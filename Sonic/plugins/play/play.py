@@ -1,4 +1,4 @@
-import random
+﻿import random
 import string
 
 from pyrogram import filters
@@ -6,7 +6,7 @@ from pyrogram.types import InlineKeyboardMarkup, InputMediaPhoto, Message
 from pytgcalls.exceptions import NoActiveGroupCall
 
 import config
-from Sonic import Apple, Resso, SoundCloud, Spotify, Telegram, YouTube, app
+from Sonic import Apple, LOGGER, Resso, SoundCloud, Spotify, Telegram, YouTube, app
 from Sonic.core.call import Sonic
 from Sonic.utils import seconds_to_min, time_to_seconds
 from Sonic.utils.channelplay import get_channeplayCB
@@ -36,6 +36,14 @@ from config import BANNED_USERS, lyrical
             "vplayforce",
             "cplayforce",
             "cvplayforce",
+            "forceplay",
+            "vforceplay",
+            "cforceplay",
+            "cvforceplay",
+            "fplay",
+            "vfplay",
+            "cfplay",
+            "cvfplay",
         ]
     )
     & filters.group
@@ -105,7 +113,7 @@ async def play_commnd(
                     forceplay=fplay,
                 )
             except Exception as e:
-                print(f"Error: {e}")
+                LOGGER(__name__).exception(f"Error in telegram video/audio play: {e}")
                 ex_type = type(e).__name__
                 err = e if ex_type == "AssistantErr" else _["general_2"].format(ex_type)
                 return await mystic.edit_text(err)
@@ -149,7 +157,7 @@ async def play_commnd(
                     forceplay=fplay,
                 )
             except Exception as e:
-                print(f"Error: {e}")
+                LOGGER(__name__).exception(f"Error in telegram video/audio play: {e}")
                 ex_type = type(e).__name__
                 err = e if ex_type == "AssistantErr" else _["general_2"].format(ex_type)
                 return await mystic.edit_text(err)
@@ -163,7 +171,8 @@ async def play_commnd(
                         config.PLAYLIST_FETCH_LIMIT,
                         message.from_user.id,
                     )
-                except:
+                except Exception as e:
+                    LOGGER(__name__).exception(f"Error while fetching playlist {url}: {e}")
                     return await mystic.edit_text(_["play_3"])
                 streamtype = "playlist"
                 plist_type = "yt"
@@ -176,7 +185,11 @@ async def play_commnd(
             else:
                 try:
                     details, track_id = await YouTube.track(url)
-                except:
+                except Exception as e:
+                    LOGGER(__name__).exception(f"Error while fetching track {url}: {e}")
+                    return await mystic.edit_text(_["play_3"])
+                if not details:
+                    LOGGER(__name__).error(f"No details found for track {url}")
                     return await mystic.edit_text(_["play_3"])
                 streamtype = "youtube"
                 img = details["thumb"]
@@ -194,7 +207,7 @@ async def play_commnd(
                 try:
                     details, track_id = await Spotify.track(url)
                 except Exception as e:
-                    print(f"play_3 error: fail to process your query | Exception: {e}")
+                    LOGGER(__name__).exception(f"Spotify error: {e}")
                     return await mystic.edit_text(_["play_3"])
                 streamtype = "youtube"
                 img = details["thumb"]
@@ -203,7 +216,7 @@ async def play_commnd(
                 try:
                     details, plist_id = await Spotify.playlist(url)
                 except Exception as e:
-                    print(f"play_3 error: fail to process your query | Exception: {e}")
+                    LOGGER(__name__).exception(f"Spotify error: {e}")
                     return await mystic.edit_text(_["play_3"])
                 streamtype = "playlist"
                 plist_type = "spplay"
@@ -284,7 +297,7 @@ async def play_commnd(
                     forceplay=fplay,
                 )
             except Exception as e:
-                print(f"Error: {e}")
+                LOGGER(__name__).exception(f"Error in telegram video/audio play: {e}")
                 ex_type = type(e).__name__
                 err = e if ex_type == "AssistantErr" else _["general_2"].format(ex_type)
                 return await mystic.edit_text(err)
@@ -298,7 +311,7 @@ async def play_commnd(
                     text=_["play_17"],
                 )
             except Exception as e:
-                print(f"Error: {e}")
+                LOGGER(__name__).exception(f"Error in telegram video/audio play: {e}")
                 return await mystic.edit_text(_["general_2"].format(type(e).__name__))
             await mystic.edit_text(_["str_2"])
             try:
@@ -315,7 +328,7 @@ async def play_commnd(
                     forceplay=fplay,
                 )
             except Exception as e:
-                print(f"Error: {e}")
+                LOGGER(__name__).exception(f"Error in telegram video/audio play: {e}")
                 ex_type = type(e).__name__
                 err = e if ex_type == "AssistantErr" else _["general_2"].format(ex_type)
                 return await mystic.edit_text(err)
@@ -374,7 +387,7 @@ async def play_commnd(
                 forceplay=fplay,
             )
         except Exception as e:
-            print(f"Error: {e}")
+            LOGGER(__name__).exception(f"Error in telegram video/audio play: {e}")
             ex_type = type(e).__name__
             err = e if ex_type == "AssistantErr" else _["general_2"].format(ex_type)
             return await mystic.edit_text(err)
@@ -513,6 +526,8 @@ async def play_music(client, CallbackQuery, _):
         details, track_id = await YouTube.track(vidid, True)
     except:
         return await mystic.edit_text(_["play_3"])
+    if not details:
+        return await mystic.edit_text(_["play_3"])
     if details["duration_min"]:
         duration_sec = time_to_seconds(details["duration_min"])
         if duration_sec > config.DURATION_LIMIT:
@@ -548,7 +563,7 @@ async def play_music(client, CallbackQuery, _):
             forceplay=ffplay,
         )
     except Exception as e:
-        print(f"Error: {e}")
+        LOGGER(__name__).exception(f"Error in telegram video/audio play: {e}")
         ex_type = type(e).__name__
         err = e if ex_type == "AssistantErr" else _["general_2"].format(ex_type)
         return await mystic.edit_text(err)
@@ -559,7 +574,7 @@ async def play_music(client, CallbackQuery, _):
 async def anonymous_check(client, CallbackQuery):
     try:
         await CallbackQuery.answer(
-            "» Revert back to user account :\n\nOpen your group settings.\n-> Administrators\n-> Click on your name\n-> Uncheck anonymous admin permissions.",
+            "Â» Revert back to user account :\n\nOpen your group settings.\n-> Administrators\n-> Click on your name\n-> Uncheck anonymous admin permissions.",
             show_alert=True,
         )
     except:
@@ -647,7 +662,7 @@ async def play_playlists_command(client, CallbackQuery, _):
             forceplay=ffplay,
         )
     except Exception as e:
-        print(f"Error: {e}")
+        LOGGER(__name__).exception(f"Error in telegram video/audio play: {e}")
         ex_type = type(e).__name__
         err = e if ex_type == "AssistantErr" else _["general_2"].format(ex_type)
         return await mystic.edit_text(err)
